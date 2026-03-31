@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGIML Interface</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">NGIML</p>
+      <h1>Upload an image, pick a checkpoint, and inspect the model output.</h1>
+      <p class="subtitle">The app auto-loads every <code>.pt</code> checkpoint found in the local <code>checkpoints</code> folder.</p>
+    </section>
+
+    <section class="panel">
+      {% if not checkpoints %}
+      <div class="message error">
+        No checkpoints were found in <code>checkpoints/</code>. Add at least one <code>.pt</code> file and refresh.
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="message error">{{ error }}</div>
+      {% endif %}
+
+      <form action="/predict" method="post" enctype="multipart/form-data" class="form">
+        <label class="field">
+          <span>Checkpoint</span>
+          <select name="checkpoint" {% if not checkpoints %}disabled{% endif %}>
+            {% for checkpoint in checkpoints %}
+            <option value="{{ checkpoint.value }}" {% if checkpoint.value == selected_checkpoint %}selected{% endif %}>{{ checkpoint.label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Image</span>
+          <input type="file" name="image" accept="image/png,image/jpeg,image/jpg,image/bmp,image/tiff,image/webp" required {% if not checkpoints %}disabled{% endif %}>
+        </label>
+
+        <button type="submit" class="button" {% if not checkpoints %}disabled{% endif %}>Run Inference</button>
+      </form>
+    </section>
+
+    {% if result %}
+    <section class="panel result-summary">
+      <div>
+        <p class="eyebrow">Result</p>
+        <h2>{{ result.checkpoint }}</h2>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Threshold</span><strong>{{ result.threshold }}</strong></div>
+        <div class="stat"><span>Device</span><strong>{{ result.device }}</strong></div>
+        <div class="stat"><span>Normalization</span><strong>{{ result.normalization_mode }}</strong></div>
+        <div class="stat"><span>Prob. Mean</span><strong>{{ result.probability_mean }}</strong></div>
+        <div class="stat"><span>Prob. Max</span><strong>{{ result.probability_max }}</strong></div>
+        <div class="stat"><span>Positive Ratio</span><strong>{{ result.predicted_positive_ratio }}</strong></div>
+      </div>
+      <p class="output-link">Saved in <code>{{ result.output_dir }}</code> and metadata is available at <a href="{{ result.metadata_url }}" target="_blank" rel="noreferrer">prediction.json</a>.</p>
+    </section>
+
+    <section class="gallery">
+      <article class="panel card">
+        <h3>Input</h3>
+        <img src="{{ result.input_url }}" alt="Uploaded input image">
+      </article>
+      <article class="panel card">
+        <h3>Probability Map</h3>
+        <img src="{{ result.probability_url }}" alt="Probability map">
+      </article>
+      <article class="panel card">
+        <h3>Binary Mask</h3>
+        <img src="{{ result.binary_url }}" alt="Binary mask">
+      </article>
+      <article class="panel card">
+        <h3>Overlay</h3>
+        <img src="{{ result.overlay_url }}" alt="Overlay result">
+      </article>
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>
