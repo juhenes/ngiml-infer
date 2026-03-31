@@ -10,8 +10,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from src import run_inference
-
 BASE_DIR = Path(__file__).resolve().parent
 CHECKPOINTS_DIR = BASE_DIR / "checkpoints"
 STATIC_DIR = BASE_DIR / "static"
@@ -62,6 +60,12 @@ def build_run_dir(image_name: str) -> Path:
     safe_stem = Path(image_name).stem or "upload"
     safe_stem = "".join(ch for ch in safe_stem if ch.isalnum() or ch in {"-", "_"}) or "upload"
     return WEB_RUNS_DIR / f"{timestamp}-{safe_stem}-{uuid4().hex[:8]}"
+
+
+def get_run_inference():
+    from src import run_inference
+
+    return run_inference
 
 
 def to_results_url(path: str | Path) -> str:
@@ -129,6 +133,7 @@ async def predict(
         shutil.copyfileobj(image.file, buffer)
 
     try:
+        run_inference = get_run_inference()
         prediction = run_inference(
             checkpoint_path=checkpoint_path,
             image_path=image_path,

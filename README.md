@@ -4,21 +4,35 @@ FastAPI web interface for running NGIML inference from local checkpoints.
 
 ## Quick start
 
-1. Install dependencies:
+Recommended on Windows: use the included setup script. It creates a clean Python 3.13 virtual environment, installs the web dependencies, and installs CPU PyTorch from the official wheel index.
 
 ```bash
-pip install -r requirements.txt
+.\setup_windows.ps1
 ```
 
-2. Put one or more `.pt` checkpoints inside `checkpoints/`.
-
-3. Start the web app:
+Then run the app:
 
 ```bash
-uvicorn app:app --reload
+.\run_web.ps1
 ```
 
-4. Open `http://127.0.0.1:8000`
+Open `http://127.0.0.1:8000`
+
+## Model setup
+
+Put one or more `.pt` checkpoints inside `checkpoints/`.
+
+## Manual setup
+
+If you prefer manual commands, use plain CPython on Windows and avoid mixing Conda Python with the project virtual environment.
+
+```bash
+py -3.13 -m venv .venv313
+.\.venv313\Scripts\python.exe -m pip install --upgrade pip
+.\.venv313\Scripts\python.exe -m pip install fastapi uvicorn python-multipart jinja2 timm numpy pillow matplotlib
+.\.venv313\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+.\.venv313\Scripts\python.exe -m uvicorn app:app --reload
+```
 
 ## What the web UI does
 
@@ -36,3 +50,4 @@ uvicorn app:app --reload
 - Styles: `static/styles.css`
 - Result files are served from `web_runs/`
 - Existing CLI inference via `predict.py` still works
+- `setup_windows.ps1` and `run_web.ps1` are the recommended workflow on Windows

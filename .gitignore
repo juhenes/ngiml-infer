@@ -4,3 +4,6 @@ outputs/
 checkpoints/*
 web_runs/
 .venv/*
+.venv313/
+.tmp-py313/
+.tmp-setup/
