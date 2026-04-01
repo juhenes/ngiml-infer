@@ -21,7 +21,7 @@ Core ideas:
 
 ## Training Note
 
-All pretrained models in this repository were trained **exclusively on CASIA v2 (CASIA v2.0)**. Performance on other datasets or real-world images may vary and may require additional fine-tuning.
+All pretrained models in this repository were trained **exclusively on [`CASIA v2`](https://github.com/namtpham/casia2groundtruth)**. Performance on other datasets or real-world images may vary and may require additional fine-tuning.
 
 ---
 
@@ -40,16 +40,16 @@ The model follows a multi-stage pipeline:
 
 ## Repository Contents
 
-- `predict.py`  
+- [`predict.py`](./predict.py)  
   CLI entry point for running inference on a single RGB image
 
-- `src/runtime.py`  
+- [`src/runtime.py`](./src/runtime.py)  
   Checkpoint loading, preprocessing, inference, visualization, and export utilities
 
-- `src/model/`  
+- [`src/model/`](./src/model/)  
   Model architecture, backbone definitions, feature fusion, and decoder modules
 
-- `infer.ipynb`  
+- [`infer.ipynb`](./infer.ipynb)  
   Notebook workflow for single-image inference with Hugging Face checkpoints
 
 ---
@@ -73,7 +73,7 @@ Each file corresponds to a different model configuration.
 
 ## Running Inference in the Colab Notebook
 
-Play with the inference code using [`this google colab link`](https://colab.research.google.com/github/juhenes/ngiml-infer/blob/main/infer.ipynb).
+Run the notebook in Colab using [`infer.ipynb` on Google Colab](https://colab.research.google.com/github/juhenes/ngiml-infer/blob/main/infer.ipynb).
 
 ---
 
@@ -133,3 +133,37 @@ When an output directory is used, the runtime saves:
 ## License
 
 This project is released under the license provided in [`LICENSE`](./LICENSE).
+
+---
+
+## References
+
+1. Dong, J., Wang, W., and Tan, T. "CASIA Image Tampering Detection Evaluation Database." 2013 IEEE China Summit and International Conference on Signal and Information Processing, 2013. [DOI](https://doi.org/10.1109/chinasip.2013.6625374)
+
+```bibtex
+@inproceedings{Dong2013,
+  doi = {10.1109/chinasip.2013.6625374},
+  url = {https://doi.org/10.1109/chinasip.2013.6625374},
+  year = {2013},
+  month = jul,
+  publisher = {{IEEE}},
+  author = {Jing Dong and Wei Wang and Tieniu Tan},
+  title = {{CASIA} Image Tampering Detection Evaluation Database},
+  booktitle = {2013 {IEEE} China Summit and International Conference on Signal and Information Processing}
+}
+```
+
+2. Pham, N. T., Lee, J.-W., Kwon, G.-R., and Park, C.-S. "Hybrid Image-Retrieval Method for Image-Splicing Validation." Symmetry, 11(1), 83, 2019.
+
+```bibtex
+@article{pham2019hybrid,
+  title = {Hybrid Image-Retrieval Method for Image-Splicing Validation},
+  author = {Pham, Nam Thanh and Lee, Jong-Weon and Kwon, Goo-Rak and Park, Chun-Su},
+  journal = {Symmetry},
+  volume = {11},
+  number = {1},
+  pages = {83},
+  year = {2019},
+  publisher = {Multidisciplinary Digital Publishing Institute}
+}
+```
