@@ -71,17 +71,9 @@ Available checkpoints:
 
 Each file corresponds to a different model configuration.
 
-## Running Inference in the Notebook
+## Running Inference in the Colab Notebook
 
-Open [`infer.ipynb`](./infer.ipynb) and run the cells in order.
-
-The notebook workflow will:
-
-1. Load the project environment
-2. Let you choose or upload an image
-3. Download a selected checkpoint from Hugging Face automatically
-4. Run inference
-5. Visualize the probability map, binary mask, and overlay
+Play with the inference code using [`this google colab link`](https://colab.research.google.com/github/juhenes/ngiml-infer/blob/main/infer.ipynb).
 
 ---
 
