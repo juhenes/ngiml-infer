@@ -457,6 +457,7 @@ def download_checkpoint_from_huggingface(
         repo_id=repo_id,
         filename=filename,
         local_dir=str(target_dir),
+        token=False,
     )
     return Path(downloaded).resolve()
 
