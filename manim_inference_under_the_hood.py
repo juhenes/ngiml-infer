@@ -441,7 +441,7 @@ class NGIMLInferenceUnderTheHood(Scene):
     def _chapter1(self, data: dict) -> None:
         title = Text("Preparation", font_size=30).move_to(UP * self.TITLE_Y)
         subtitle = Text(
-            f"input=auto_preprocessed | normalization={data['normalization_mode']}",
+            f"normalization={data['normalization_mode']}",
             font_size=18,
         ).next_to(title, DOWN, buff=0.12)
         self.play(Write(title), FadeIn(subtitle))
