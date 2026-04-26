@@ -44,6 +44,7 @@ class FeatureFusionConfig:
     activation: str = "relu"
     fusion_refinement: bool = True  # Add Conv3x3+IN+ReLU after fusion output (enabled by default)
     enable_joint_gating: bool = False
+    balance_branch_scales: bool = True
     late_residual_boost_start: int = 1
     late_residual_boost: float = 0.0
 
@@ -61,6 +62,7 @@ class _AdaptiveFusionStage(nn.Module):
         activation: str,
         fusion_refinement: bool = False,
         enable_joint_gating: bool = False,
+        balance_branch_scales: bool = True,
         late_residual_boost: float = 0.0,
     ) -> None:
         super().__init__()
@@ -93,6 +95,7 @@ class _AdaptiveFusionStage(nn.Module):
             )
         else:
             self.joint_gate_generator = None
+        self.balance_branch_scales = bool(balance_branch_scales)
         self.gate_bias = nn.ParameterDict(
             {
                 branch: nn.Parameter(torch.zeros((1, out_channels, 1, 1)))
@@ -158,6 +161,9 @@ class _AdaptiveFusionStage(nn.Module):
             proj = self.projections[branch](tensor)
             if proj.shape[-2:] != (align_h, align_w):
                 proj = F.interpolate(proj, size=(align_h, align_w), mode="bilinear", align_corners=False)
+            if self.balance_branch_scales:
+                rms = proj.pow(2).mean(dim=(2, 3), keepdim=True).sqrt().clamp_min(1e-5)
+                proj = proj / rms
             aligned_projections[branch] = proj
 
         if len(self.branch_order) > 1 and hasattr(self, "joint_gate_generator") and self.joint_gate_generator is not None:
@@ -248,6 +254,7 @@ class MultiStageFeatureFusion(nn.Module):
                     activation=config.activation,
                     fusion_refinement=getattr(config, 'fusion_refinement', False),
                     enable_joint_gating=getattr(config, "enable_joint_gating", False),
+                    balance_branch_scales=getattr(config, "balance_branch_scales", True),
                     late_residual_boost=(
                         getattr(config, "late_residual_boost", 0.0)
                         if (

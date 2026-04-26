@@ -61,10 +61,12 @@ def build_default_model_config() -> HybridNGIMLConfig:
             residual=OptimizerGroupConfig(lr=2.5e-4, weight_decay=2e-4),
             fusion=OptimizerGroupConfig(lr=1.2e-4, weight_decay=2e-4),
             decoder=OptimizerGroupConfig(lr=1.8e-4, weight_decay=2e-4),
+            freeze_residual_fusion_epochs=1,
         ),
         use_low_level=True,
         use_context=True,
         use_residual=True,
+        use_fusion=True,
     )
 
 
@@ -101,6 +103,12 @@ def _coerce_optimizer_config(value: Any) -> HybridNGIMLOptimizerConfig:
         betas=betas,
         eps=float(value.get("eps", default_opt.eps)),
         freeze_backbone_epochs=int(value.get("freeze_backbone_epochs", default_opt.freeze_backbone_epochs)),
+        freeze_residual_fusion_epochs=int(
+            value.get(
+                "freeze_residual_fusion_epochs",
+                getattr(default_opt, "freeze_residual_fusion_epochs", 1),
+            )
+        ),
     )
 
 
@@ -130,6 +138,7 @@ def coerce_model_config(value: Any) -> HybridNGIMLConfig:
         use_low_level=bool(value.get("use_low_level", default_model.use_low_level)),
         use_context=bool(value.get("use_context", default_model.use_context)),
         use_residual=bool(value.get("use_residual", default_model.use_residual)),
+        use_fusion=bool(value.get("use_fusion", default_model.use_fusion)),
         enable_residual_attention=bool(value.get("enable_residual_attention", default_model.enable_residual_attention)),
         enable_low_level_residual_attention=bool(
             value.get("enable_low_level_residual_attention", default_model.enable_low_level_residual_attention)

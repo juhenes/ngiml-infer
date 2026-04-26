@@ -16,6 +16,7 @@ class ResidualNoiseConfig:
     num_kernels: int = 3  # SRM kernels (fixed)
     base_channels: int = 32  # CNN backbone base channels
     num_stages: int = 4      # Number of pyramid stages
+    norm: str = "gn"
 
 
 class ConvBlock(nn.Module):
@@ -23,16 +24,16 @@ class ConvBlock(nn.Module):
 
     Forensic motivation: Normalization is disabled for residual/noise branch to preserve forensic frequency statistics.
     """
-    def __init__(self, in_channels: int, out_channels: int, norm_layer: nn.Module = None) -> None:
+    def __init__(self, in_channels: int, out_channels: int, norm_type: str = "gn") -> None:
         super().__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d(out_channels)
+        norm1 = build_residual_norm(norm_type, out_channels)
+        norm2 = build_residual_norm(norm_type, out_channels)
         self.net = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False, padding_mode="reflect"),
-            norm_layer,
+            norm1,
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False, padding_mode="reflect"),
-            norm_layer.__class__(out_channels) if not isinstance(norm_layer, nn.Identity) else nn.Identity(),
+            norm2,
             nn.ReLU(inplace=True),
         )
 
@@ -91,15 +92,13 @@ class ResidualNoiseModule(nn.Module):
         downsamplers = []
         current_in = self.srm_out_channels
         for idx, out_channels in enumerate(stage_channels):
-            # Disable normalization for residual branch
-            norm_layer = nn.Identity()
-            blocks.append(ConvBlock(current_in, out_channels, norm_layer=norm_layer))
+            blocks.append(ConvBlock(current_in, out_channels, norm_type=cfg.norm))
             current_in = out_channels
             if idx < cfg.num_stages - 1:
                 downsamplers.append(
                     nn.Sequential(
                         nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False, padding_mode="reflect"),
-                        nn.Identity(),
+                        build_residual_norm(cfg.norm, out_channels),
                         nn.ReLU(inplace=True),
                     )
                 )
@@ -180,6 +179,20 @@ class ResidualNoiseModule(nn.Module):
 
 # Backward compatibility for existing imports
 ResidualNoiseBranch = ResidualNoiseModule
+
+
+def build_residual_norm(norm_type: str, channels: int) -> nn.Module:
+    norm_key = str(norm_type).strip().lower()
+    if norm_key == "bn":
+        return nn.BatchNorm2d(channels)
+    if norm_key == "in":
+        return nn.InstanceNorm2d(channels, affine=True)
+    if norm_key == "gn":
+        groups = min(8, channels)
+        while groups > 1 and (channels % groups != 0):
+            groups -= 1
+        return nn.GroupNorm(groups, channels)
+    return nn.Identity()
 
 __all__ = ["ResidualNoiseModule", "ResidualNoiseBranch", "ResidualNoiseConfig"]
 
